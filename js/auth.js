@@ -18,7 +18,7 @@ export async function signup(email,password){
 export async function googleLogin(){
   try{
     await signInWithPopup(auth,googleProvider);
-    window.location.href="dashboard.html";
+    window.location.href="index.html";
   }catch(err){
     alert(err.message);
   }
