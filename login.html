@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  
+  <link rel="stylesheet" href="css/style.css">
+  
+  <style>
+    /* login specific small style */
+    .authBox {
+      max-width: 350px;
+      margin: 80px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .08);
+    }
+    
+    .authBox h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .authBox input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+    }
+    
+    .authBox button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    
+    .googleBtn {
+      background: #4285F4;
+      color: white;
+      border: none;
+    }
+    
+    .link {
+      text-align: center;
+      margin-top: 15px;
+    }
+  </style>
+  
+</head>
+
+<body>
+  
+  <div class="authBox">
+    
+    <h2>Login</h2>
+    
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    
+    <button id="loginBtn">Login</button>
+    <button class="googleBtn" id="googleBtn">Login with Google</button>
+    
+    <div class="link">
+      <a href="#" id="reset">Forgot password?</a><br><br>
+      <a href="signup.html">Create account</a>
+    </div>
+    
+  </div>
+  
+  
+  <script type="module">
+    import { auth } from "./js/firebase.js";
+    
+    import {
+      signInWithEmailAndPassword,
+      signInWithPopup,
+      sendPasswordResetEmail,
+      onAuthStateChanged,
+      GoogleAuthProvider
+    }
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    
+    const provider = new GoogleAuthProvider();
+    
+    const email = document.getElementById("email");
+    const password = document.getElementById("password");
+    
+    const loginBtn = document.getElementById("loginBtn");
+    const googleBtn = document.getElementById("googleBtn");
+    const reset = document.getElementById("reset");
+    
+    
+    /* LOGIN EMAIL */
+    loginBtn.onclick = async () => {
+      
+      if (!email.value || !password.value) {
+        alert("Enter email & password");
+        return;
+      }
+      
+      try {
+        await signInWithEmailAndPassword(auth, email.value, password.value);
+        window.location.href = "dashboard.html";
+      } catch (err) {
+        alert(err.message);
+      }
+    };
+    
+    
+    /* GOOGLE LOGIN */
+    googleBtn.onclick = async () => {
+      
+      try {
+        await signInWithPopup(auth, provider);
+        window.location.href = "dashboard.html";
+      } catch (err) {
+        alert(err.message);
+      }
+    };
+    
+    
+    /* RESET PASSWORD */
+    reset.onclick = async () => {
+      
+      const e = prompt("Enter your email");
+      
+      if (!e) return;
+      
+      try {
+        await sendPasswordResetEmail(auth, e);
+        alert("Reset email sent");
+      } catch (err) {
+        alert(err.message);
+      }
+    };
+    
+    
+    /* ALREADY LOGGED IN */
+    onAuthStateChanged(auth, user => {
+      if (user) window.location.href = "dashboard.html";
+    });
+  </script>
+  
+</body>
+
+</html>
