@@ -1,0 +1,274 @@
+/* ===== ROOT SYSTEM ===== */
+
+:root{
+  --primary:#2563eb;
+  --danger:#ef4444;
+  --success:#16a34a;
+  --bg:#f6f8fb;
+  --card:#ffffff;
+  --text:#1f2937;
+  --radius:16px;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Inter,system-ui,Arial;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.4;
+}
+
+/* ===== NAVBAR ===== */
+
+.navbar{
+  position:sticky;
+  top:0;
+  background:rgba(255,255,255,.85);
+  backdrop-filter:blur(14px);
+  padding:14px clamp(14px,4vw,32px);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  box-shadow:0 2px 14px rgba(0,0,0,.06);
+  z-index:100;
+}
+
+.nav-left{font-weight:600;font-size:clamp(16px,2vw,20px);}
+
+.nav-right{
+  display:flex;
+  align-items:center;
+  gap:clamp(10px,2vw,20px);
+}
+
+.nav-right a{
+  text-decoration:none;
+  color:#374151;
+  font-weight:500;
+}
+
+.nav-btn{
+  background:var(--danger);
+  border:none;
+  color:white;
+  padding:8px 14px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+/* ===== CONTAINER ===== */
+
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:clamp(14px,3vw,32px);
+}
+
+/* ===== CARDS ===== */
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:clamp(12px,2vw,22px);
+}
+
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:clamp(16px,2vw,24px);
+  box-shadow:0 10px 30px rgba(0,0,0,.06);
+  transition:.25s;
+}
+
+.card:hover{
+  transform:translateY(-4px);
+}
+
+.card h3{
+  margin:0;
+  font-size:13px;
+  color:#6b7280;
+}
+
+.card p{
+  margin-top:8px;
+  font-size:clamp(22px,3vw,30px);
+  font-weight:600;
+}
+
+.income{color:var(--success);}
+.expense{color:var(--danger);}
+
+/* ===== LIST BLOCK ===== */
+
+.list{
+  background:white;
+  margin-top:clamp(16px,2vw,26px);
+  padding:clamp(16px,2vw,26px);
+  border-radius:var(--radius);
+  box-shadow:0 8px 30px rgba(0,0,0,.05);
+}
+
+/* ===== FILTER BAR ===== */
+
+#searchBox,#monthFilter{
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  padding:10px 12px;
+  margin:6px 8px 10px 0;
+  width:clamp(140px,30vw,220px);
+}
+
+/* ===== TABLE ===== */
+
+.sheet{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+  font-size:14px;
+}
+
+.sheet th{
+  text-align:left;
+  padding:12px;
+  font-size:12px;
+  color:#6b7280;
+  border-bottom:2px solid #eee;
+}
+
+.sheet td{
+  padding:12px;
+  border-bottom:1px solid #f1f1f1;
+}
+
+.sheet tr:hover{background:#f8fafc;}
+
+/* ===== BUTTONS ===== */
+
+button{
+  border:none;
+  padding:7px 11px;
+  border-radius:7px;
+  cursor:pointer;
+  font-size:13px;
+}
+
+button:hover{opacity:.85;}
+
+button[onclick*="edit"]{
+  background:var(--primary);
+  color:white;
+}
+
+button[onclick*="delete"]{
+  background:var(--danger);
+  color:white;
+}
+
+/* ===== FLOATING ADD BUTTON ===== */
+
+.addBtn{
+  position:fixed;
+  right:clamp(16px,3vw,32px);
+  bottom:clamp(16px,3vw,32px);
+  width:clamp(56px,8vw,68px);
+  height:clamp(56px,8vw,68px);
+  border-radius:50%;
+  background:var(--primary);
+  color:white;
+  font-size:clamp(24px,3vw,30px);
+  box-shadow:0 16px 35px rgba(37,99,235,.45);
+}
+
+/* ===== MODAL ===== */
+
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.35);
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+
+.modalBox{
+  background:white;
+  border-radius:20px;
+  padding:clamp(20px,3vw,28px);
+  width:min(92vw,380px);
+  box-shadow:0 30px 60px rgba(0,0,0,.18);
+}
+
+.modalBox input,
+.modalBox select{
+  width:100%;
+  padding:11px;
+  margin:8px 0;
+  border:1px solid #e5e7eb;
+  border-radius:9px;
+}
+
+/* ===== CHARTS ===== */
+
+canvas{
+  margin-top:18px;
+  width:100%!important;
+  height:auto!important;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+
+@media(max-width:900px){
+
+.container{
+  padding:18px;
+}
+
+.sheet th,.sheet td{
+  padding:10px 8px;
+  font-size:13px;
+}
+
+}
+
+/* ===== SMALL MOBILE ===== */
+
+@media(max-width:600px){
+
+.nav-right a{
+  display:none;
+}
+
+.cards{
+  grid-template-columns:1fr;
+}
+
+.sheet{
+  display:block;
+  overflow-x:auto;
+  white-space:nowrap;
+}
+
+.modalBox{
+  width:100%;
+}
+
+}
+
+/* ===== EXTRA SMALL ===== */
+
+@media(max-width:400px){
+
+.card p{
+  font-size:22px;
+}
+
+.addBtn{
+  right:18px;
+  bottom:18px;
+}
+
+}
