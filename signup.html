@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signup</title>
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    
+    .card {
+      background: white;
+      padding: 30px;
+      width: 320px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, .1);
+    }
+    
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: none;
+      background: #4CAF50;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    
+    button:hover {
+      background: #45a049;
+    }
+    
+    .google {
+      background: #4285F4;
+    }
+    
+    .google:hover {
+      background: #357ae8;
+    }
+    
+    p {
+      text-align: center;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+
+<body>
+  
+  <div class="card">
+    <h2>Create Account</h2>
+    
+    <input id="email" type="email" placeholder="Enter email">
+    <input id="password" type="password" placeholder="Enter password">
+    
+    <button id="signupBtn">Signup</button>
+    <button class="google" id="googleBtn">Signup with Google</button>
+    
+    <p>Already have account? <a href="login.html">Login</a></p>
+  </div>
+  
+  <script type="module">
+    import { signup, googleLogin } from "./js/auth.js";
+    
+    const email = document.getElementById("email");
+    const password = document.getElementById("password");
+    const signupBtn = document.getElementById("signupBtn");
+    const googleBtn = document.getElementById("googleBtn");
+    
+    signupBtn.onclick = () => {
+      
+      if (!email.value || !password.value) {
+        alert("Please fill all fields");
+        return;
+      }
+      
+      if (password.value.length < 6) {
+        alert("Password must be at least 6 characters");
+        return;
+      }
+      
+      signup(email.value, password.value);
+    };
+    
+    googleBtn.onclick = googleLogin;
+  </script>
+  
+</body>
+
+</html>
