@@ -12,9 +12,8 @@
 <body>
 
 <div class="navbar">
-<div class="nav-left">Expense Tracker</div>
+<div class="nav-left">💰 Expense Tracker</div>
 <div class="nav-right">
-<a href="dashboard.html">Dashboard</a>
 <a href="profile.html">Profile</a>
 <button id="logoutBtn" class="nav-btn">Logout</button>
 </div>
@@ -29,14 +28,7 @@
 </div>
 
 <div class="list">
-
 <h3>Transactions</h3>
-
-<input id="searchBox" placeholder="Search..." style="padding:8px;width:200px;">
-<select id="monthFilter" style="padding:8px;">
-<option value="">All Months</option>
-</select>
-<button id="exportCSV">Export CSV</button>
 
 <table class="sheet">
 <thead>
@@ -45,7 +37,6 @@
 <th>Type</th>
 <th>Category</th>
 <th>Amount</th>
-<th>Action</th>
 </tr>
 </thead>
 
@@ -62,12 +53,12 @@
 
 </div>
 
-<button class="addBtn" id="openModal">+</button>
+<button id="openModal" class="addBtn">+</button>
 
 <div id="modal" class="modal">
 <div class="modalBox">
 
-<h3 id="modalTitle">Add Transaction</h3>
+<h3>Add Transaction</h3>
 
 <select id="type">
 <option value="income">Income</option>
@@ -88,142 +79,121 @@
 
 import { auth, db } from "./js/firebase.js";
 
-import { signOut,onAuthStateChanged }
+import { signOut, onAuthStateChanged }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
-collection,addDoc,getDocs,query,orderBy,
-serverTimestamp,deleteDoc,doc,updateDoc
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+collection, addDoc, getDocs, query, orderBy,
+serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+
+// ===== DOM SAFE REFERENCES (IMPORTANT FOR GITHUB) =====
+const modal=document.getElementById("modal");
+const openModal=document.getElementById("openModal");
+const closeModal=document.getElementById("closeModal");
+const saveBtn=document.getElementById("saveBtn");
 
 const balance=document.getElementById("balance");
 const incomeEl=document.getElementById("income");
 const expenseEl=document.getElementById("expense");
-const transactions=document.getElementById("transactions");
+const table=document.getElementById("transactions");
 
-logoutBtn.onclick=()=>signOut(auth).then(()=>location.href="login.html");
 
-openModal.onclick=()=>modal.style.display="flex";
-closeModal.onclick=resetModal;
+// ===== UI =====
+openModal.onclick=()=> modal.style.display="flex";
+closeModal.onclick=()=> modal.style.display="none";
 
-let editId=null;
-let allData=[];
-let barChart=null;
-let pieChart=null;
+logoutBtn.onclick=()=> signOut(auth).then(()=>location.href="login.html");
 
-function resetModal(){
-modal.style.display="none";
-amount.value="";
-note.value="";
-editId=null;
-modalTitle.textContent="Add Transaction";
-}
 
+// ===== SAVE =====
 saveBtn.onclick=async()=>{
 
-const typeVal=type.value;
-const amountVal=Number(amount.value);
-const noteVal=note.value;
+const typeVal=document.getElementById("type").value;
+const amountVal=Number(document.getElementById("amount").value);
+const noteVal=document.getElementById("note").value;
 
-if(!amountVal||amountVal<=0){ alert("Enter valid amount"); return; }
+if(!amountVal||amountVal<=0){
+alert("Enter valid amount");
+return;
+}
 
 const user=auth.currentUser;
-if(!user){ alert("Login again"); return; }
+if(!user){
+alert("Login required");
+return;
+}
 
-try{
-
-if(editId){
-await updateDoc(doc(db,"users",user.uid,"transactions",editId),
-{type:typeVal,amount:amountVal,note:noteVal});
-}else{
-await addDoc(collection(db,"users",user.uid,"transactions"),{
+await addDoc(
+collection(db,"users",user.uid,"transactions"),
+{
 type:typeVal,
 amount:amountVal,
 note:noteVal,
 createdAt:serverTimestamp(),
 time:new Date().toISOString()
-});
 }
+);
 
-resetModal();
-loadTransactions();
+modal.style.display="none";
+document.getElementById("amount").value="";
+document.getElementById("note").value="";
 
-}catch(e){alert(e.message);}
+load();
+
 };
 
 
+// ===== CHARTS =====
+let barChart=null;
+let pieChart=null;
 
-async function loadTransactions(){
+
+// ===== LOAD =====
+async function load(){
 
 const user=auth.currentUser;
-if(!user)return;
+if(!user) return;
 
-const q=query(collection(db,"users",user.uid,"transactions"),
-orderBy("createdAt","desc"));
+const q=query(
+collection(db,"users",user.uid,"transactions"),
+orderBy("createdAt","desc")
+);
 
 const snap=await getDocs(q);
 
-allData=[];
-let months=new Set();
+table.innerHTML="";
+
+let income=0;
+let expense=0;
+let cats={};
 
 snap.forEach(d=>{
+
 const t=d.data();
-const id=d.id;
-const dateObj=t.createdAt?.toDate?.()||new Date(t.time);
-const monthKey=dateObj.getFullYear()+"-"+(dateObj.getMonth()+1);
-months.add(monthKey);
-allData.push({id,...t,dateObj});
-});
-
-monthFilter.innerHTML='<option value="">All Months</option>';
-months.forEach(m=>{
-const op=document.createElement("option");
-op.value=m; op.textContent=m;
-monthFilter.appendChild(op);
-});
-
-renderTable(allData);
-
-}
-
-
-
-function renderTable(data){
-
-transactions.innerHTML="";
-
-let income=0,expense=0,categories={};
-
-data.forEach(t=>{
-
 const amt=Number(t.amount)||0;
+const dateObj=t.createdAt?.toDate?.()||new Date(t.time);
 
 if(t.type==="income") income+=amt;
 else{
 expense+=amt;
 const cat=t.note||"Other";
-categories[cat]=(categories[cat]||0)+amt;
+cats[cat]=(cats[cat]||0)+amt;
 }
 
 const tr=document.createElement("tr");
-const dateStr=t.dateObj.toLocaleDateString()+" "+t.dateObj.toLocaleTimeString();
 
 tr.innerHTML=`
-<td>${dateStr}</td>
+<td>${dateObj.toLocaleDateString()} ${dateObj.toLocaleTimeString()}</td>
 <td style="color:${t.type==="income"?"green":"red"}">${t.type}</td>
 <td>${t.note||"-"}</td>
 <td style="color:${t.type==="income"?"green":"red"}">
 ${t.type==="income"?"+":"-"}${amt}
 </td>
-<td>
-<button onclick="window.editRow('${t.id}')">Edit</button>
-<button onclick="window.deleteRow('${t.id}')">Delete</button>
-</td>
 `;
 
-transactions.appendChild(tr);
+table.appendChild(tr);
 
 });
 
@@ -231,63 +201,13 @@ balance.textContent=income-expense;
 incomeEl.textContent=income;
 expenseEl.textContent=expense;
 
-drawCharts(income,expense,categories);
+drawCharts(income,expense,cats);
 
 }
 
 
-
-window.editRow=(id)=>{
-const t=allData.find(x=>x.id===id);
-type.value=t.type;
-amount.value=t.amount;
-note.value=t.note;
-modalTitle.textContent="Edit Transaction";
-editId=id;
-modal.style.display="flex";
-};
-
-
-window.deleteRow=async(id)=>{
-if(!confirm("Delete this record?"))return;
-const user=auth.currentUser;
-await deleteDoc(doc(db,"users",user.uid,"transactions",id));
-loadTransactions();
-};
-
-
-searchBox.oninput=()=>{
-const s=searchBox.value.toLowerCase();
-renderTable(allData.filter(t=>
-(t.note||"").toLowerCase().includes(s)||
-t.type.toLowerCase().includes(s)||
-String(t.amount).includes(s)
-));
-};
-
-monthFilter.onchange=()=>{
-if(!monthFilter.value)return renderTable(allData);
-renderTable(allData.filter(t=>{
-const m=t.dateObj.getFullYear()+"-"+(t.dateObj.getMonth()+1);
-return m===monthFilter.value;
-}));
-};
-
-exportCSV.onclick=()=>{
-let csv="Date,Type,Category,Amount\n";
-allData.forEach(t=>{
-csv+=`"${t.dateObj}","${t.type}","${t.note||""}","${t.amount}"\n`;
-});
-const blob=new Blob([csv],{type:"text/csv"});
-const a=document.createElement("a");
-a.href=URL.createObjectURL(blob);
-a.download="transactions.csv";
-a.click();
-};
-
-
-
-function drawCharts(incomeVal,expenseVal,cats){
+// ===== DRAW CHARTS =====
+function drawCharts(i,e,c){
 
 if(barChart)barChart.destroy();
 if(pieChart)pieChart.destroy();
@@ -295,21 +215,21 @@ if(pieChart)pieChart.destroy();
 barChart=new Chart(document.getElementById("barChart"),{
 type:"bar",
 data:{labels:["Income","Expense"],
-datasets:[{label:"Amount",data:[incomeVal,expenseVal]}]}
+datasets:[{label:"Amount",data:[i,e]}]}
 });
 
 pieChart=new Chart(document.getElementById("pieChart"),{
 type:"pie",
-data:{labels:Object.keys(cats),
-datasets:[{data:Object.values(cats)}]}
+data:{labels:Object.keys(c),
+datasets:[{data:Object.values(c)}]}
 });
 
 }
 
 
-
-onAuthStateChanged(auth,user=>{
-if(user) loadTransactions();
+// ===== AUTH LOAD =====
+onAuthStateChanged(auth,u=>{
+if(u) load();
 else location.href="login.html";
 });
 
